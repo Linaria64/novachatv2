@@ -14,16 +14,155 @@
 			margin: 0;
 			padding: 0;
 			color: #374151;
-		}
-		.container {
-			max-width: 800px;
-			margin: 0 auto;
-			padding: 2rem 1rem;
+			display: flex; /* Make body a flex container for page-wrapper */
 			height: 100vh;
+			overflow: hidden; /* Prevent body scroll, individual panes will scroll */
+		}
+
+		.page-wrapper {
+			display: flex;
+			width: 100%;
+			height: 100%;
+		}
+
+		#history-sidebar {
+			width: 280px; /* Slightly wider */
+			flex-shrink: 0;
+			background-color: #f0f2f5;
+			padding: 1rem;
+			border-right: 1px solid #d1d5db;
 			display: flex;
 			flex-direction: column;
 			box-sizing: border-box;
 		}
+
+		#history-sidebar h4 {
+			margin-top: 0;
+			margin-bottom: 1rem;
+			color: #374151;
+			font-size: 1.1rem;
+			border-bottom: 1px solid #dcdfe6; /* Lighter border */
+			padding-bottom: 0.75rem;
+			font-weight: 600;
+		}
+
+		#history-list {
+			overflow-y: auto;
+			flex-grow: 1;
+		}
+
+		.history-item {
+			padding: 0.75rem 1rem;
+			margin-bottom: 0.5rem;
+			background-color: #ffffff;
+			border-radius: 0.375rem;
+			cursor: pointer;
+			font-size: 0.9rem;
+			border: 1px solid #e5e7eb;
+			transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			color: #4b5563; /* Default text color */
+		}
+
+		.history-item:hover {
+			background-color: #e9ecef;
+			border-color: #ced4da;
+			color: #1f2937;
+		}
+
+		.history-item.active {
+			background-color: #dbeafe;
+			border-color: #93c5fd;
+			font-weight: 600;
+			color: #1e40af;
+		}
+		
+		.no-history-message {
+			padding: 0.75rem 1rem;
+			font-size: 0.9rem;
+			color: #6b7280;
+			text-align: center;
+		}
+
+		/* Adjusted .container styles for main content area */
+		.container {
+			padding: 1rem 1.5rem; /* Adjusted padding */
+			display: flex;
+			flex-direction: column;
+			box-sizing: border-box;
+			flex-grow: 1;
+			overflow: hidden; /* Manage scroll within this pane */
+		}
+
+		.header-controls {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 1rem;
+			gap: 0.5rem;
+			flex-shrink: 0;
+		}
+		#model-info {
+			text-align: center;
+			padding: 0.5rem;
+			background-color: #e5e7eb;
+			color: #4b5563;
+			font-size: 0.9rem;
+			border-radius: 0.375rem;
+			flex-grow: 1;
+			margin-right: 0.5rem; /* Adjusted margin */
+			margin-left: 0.5rem; /* Adjusted margin */
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+		.header-button {
+			padding: 0.5rem 0.75rem;
+			background-color: #6b7280;
+			color: white;
+			border: none;
+			border-radius: 0.375rem;
+			cursor: pointer;
+			font-size: 0.9rem;
+			line-height: 1.2;
+			white-space: nowrap;
+		}
+		.header-button:hover {
+			background-color: #4b5563;
+		}
+		.settings-button {
+			font-size: 1.2rem;
+			padding: 0.5rem 0.75rem;
+		}
+
+		/* Style for the new select dropdown */
+		.header-controls select#prompt-selector {
+			padding: 0.5rem 0.75rem;
+			background-color: #6b7280;
+			color: white;
+			border: 1px solid #4b5563;
+			border-radius: 0.375rem;
+			cursor: pointer;
+			font-size: 0.9rem;
+			line-height: 1.2;
+			-webkit-appearance: none;
+			-moz-appearance: none;
+			appearance: none;
+			background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23FFFFFF%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.4-5.4-13.2z%22%2F%3E%3C%2Fsvg%3E');
+			background-repeat: no-repeat;
+			background-position: right .7em top 50%;
+			background-size: .65em auto;
+			padding-right: 2em; /* Make space for arrow */
+			flex-shrink: 0; /* Prevent shrinking */
+			max-width: 200px; /* Prevent dropdown from becoming too wide */
+		}
+		.header-controls select#prompt-selector:hover {
+			background-color: #4b5563;
+		}
+
+
 		.chat-container {
 			flex-grow: 1;
 			overflow-y: auto;
@@ -35,30 +174,137 @@
 			display: flex;
 			flex-direction: column;
 		}
+
 		.message {
-			padding: 0.75rem 1rem;
-			border-radius: 0.5rem;
-			margin-bottom: 0.75rem;
-			max-width: 80%;
-			line-height: 1.4;
+			display: flex;
+			align-items: flex-start;
+			margin-bottom: 1rem;
+			max-width: 85%;
 		}
+		.message-icon {
+			font-size: 1.5rem;
+			margin-right: 0.75rem;
+			line-height: 1.4;
+			flex-shrink: 0;
+		}
+		.message-bubble {
+			padding: 0.75rem 1rem;
+			border-radius: 0.75rem;
+			line-height: 1.5;
+			flex-grow: 1;
+			box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
+		}
+		.message-text-content {
+			white-space: pre-wrap;
+			word-break: break-word;
+		}
+		.message-image {
+			max-width: 100%;
+			height: auto;
+			border-radius: 0.5rem;
+			margin-top: 0.5rem;
+			display: block;
+		}
+		.message-meta {
+			margin-top: 0.5rem;
+			text-align: right;
+		}
+		.message-timestamp {
+			font-size: 0.75rem;
+		}
+
 		.user-message {
+			align-self: flex-end;
+			flex-direction: row-reverse;
+		}
+		.user-message .message-icon {
+			margin-right: 0;
+			margin-left: 0.75rem;
+		}
+		.user-message .message-bubble {
 			background-color: #3b82f6;
 			color: white;
-			align-self: flex-end;
 		}
+		.user-message .message-timestamp {
+			color: #e0e0e0;
+		}
+
 		.bot-message {
+			align-self: flex-start;
+		}
+		.bot-message .message-bubble {
 			background-color: #f3f4f6;
-			align-self: flex-start;
+			color: #374151;
 		}
+		.bot-message .message-timestamp {
+			color: #6b7280;
+		}
+		
 		.error-message {
-			background-color: #fee2e2; /* Light red for errors */
-			color: #b91c1c; /* Darker red text for errors */
 			align-self: flex-start;
 		}
+		.error-message .message-bubble {
+			background-color: #fee2e2;
+			color: #b91c1c;
+		}
+		.error-message .message-icon {
+			color: #b91c1c;
+		}
+		.error-message .message-timestamp {
+			color: #ef4444;
+		}
+
+		.input-area-wrapper { /* New wrapper for input form and preview */
+			display: flex;
+			flex-direction: column;
+			gap: 0.5rem;
+			flex-shrink: 0;
+		}
+		#image-preview-container {
+			display: none; /* Hidden by default */
+			text-align: left;
+			position: relative;
+		}
+		#image-preview-container img {
+			max-width: 150px;
+			max-height: 100px;
+			border: 1px solid #d1d5db;
+			border-radius: 0.375rem;
+		}
+		#remove-image-button {
+			position: absolute;
+			top: -5px;
+			right: -5px;
+			background: rgba(0,0,0,0.6);
+			color: white;
+			border: none;
+			border-radius: 50%;
+			width: 20px;
+			height: 20px;
+			font-size: 12px;
+			line-height: 20px;
+			text-align: center;
+			cursor: pointer;
+			padding: 0;
+		}
+
 		.input-form {
 			display: flex;
 			gap: 0.5rem;
+			/* flex-shrink: 0; Removed as parent .input-area-wrapper handles this */
+		}
+		#attach-image-button {
+			padding: 0.75rem;
+			background-color: #6b7280;
+			color: white;
+			border: none;
+			border-radius: 0.5rem;
+			cursor: pointer;
+			font-size: 1rem; /* Adjust as needed */
+			flex-shrink: 0;
+		}
+		#attach-image-button:hover {
+			background-color: #4b5563;
 		}
 		.message-input {
 			flex-grow: 1;
@@ -79,13 +325,19 @@
 		.send-button:hover {
 			background-color: #2563eb;
 		}
-		.typing-indicator {
-			display: flex; /* Initially 'none', JS will change to 'flex' */
-			padding: 0.5rem;
-			margin-bottom: 0.75rem;
+
+		#typing-indicator {
+			display: flex;
+			padding: 0.5rem 0;
+			margin-bottom: 1rem;
 			align-self: flex-start;
+			align-items: center;
 		}
-		.typing-indicator span {
+		#typing-indicator .message-icon {
+			font-size: 1.5rem;
+			margin-right: 0.75rem;
+		}
+		.typing-dots span {
 			height: 8px;
 			width: 8px;
 			background-color: #9ca3af;
@@ -94,50 +346,349 @@
 			margin: 0 2px;
 			animation: bounce 1.4s infinite ease-in-out both;
 		}
-		.typing-indicator span:nth-child(1) {
+		.typing-dots span:nth-child(1) {
 			animation-delay: -0.32s;
 		}
-		.typing-indicator span:nth-child(2) {
+		.typing-dots span:nth-child(2) {
 			animation-delay: -0.16s;
 		}
 		@keyframes bounce {
-			0%, 80%, 100% {
-				transform: scale(0);
-			}
-			40% {
-				transform: scale(1.0);
-			}
+			0%, 80%, 100% { transform: scale(0); }
+			40% { transform: scale(1.0); }
 		}
+
+		/* Modal Styles */
+		.modal {
+			display: none; /* Hidden by default */
+			position: fixed; /* Stay in place */
+			z-index: 1000; /* Sit on top */
+			left: 0;
+			top: 0;
+			width: 100%; /* Full width */
+			height: 100%; /* Full height */
+			overflow: auto; /* Enable scroll if needed */
+			background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+		}
+
+		.modal-content {
+			background-color: #fefefe;
+			margin: 10% auto; /* 10% from the top and centered */
+			padding: 20px;
+			border: 1px solid #888;
+			width: 80%;
+			max-width: 700px; /* Increased max-width for new layout */
+			border-radius: 8px;
+			box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+			position: relative;
+		}
+
+		.modal-content h3, .modal-content h4 {
+			margin-top: 0;
+			border-bottom: 1px solid #eee;
+			padding-bottom: 0.75rem;
+			font-size: 1.25rem;
+		}
+		.modal-content h4 {
+			font-size: 1.1rem;
+			margin-top: 1.5rem;
+			margin-bottom: 0.75rem;
+		}
+
+
+		.modal-content label {
+			display: block;
+			margin-top: 1rem;
+			margin-bottom: 0.5rem;
+			font-weight: 600;
+			color: #374151;
+		}
+
+		.modal-content input[type="text"],
+		.modal-content textarea {
+			width: calc(100% - 22px); /* Full width minus padding and border */
+			padding: 10px;
+			margin-bottom: 1rem;
+			border: 1px solid #d1d5db;
+			border-radius: 0.375rem;
+			font-family: inherit;
+			font-size: 0.9rem;
+		}
+		.modal-content textarea {
+			min-height: 80px;
+			resize: vertical;
+		}
+
+
+		.modal-content .modal-buttons {
+			display: flex;
+			justify-content: flex-end;
+			gap: 0.5rem;
+			margin-top: 1.5rem; /* Increased margin */
+			border-top: 1px solid #eee; /* Separator line */
+			padding-top: 1rem; /* Space above buttons */
+		}
+
+		.modal-content button {
+			padding: 0.6rem 1.2rem;
+			border: none;
+			border-radius: 0.375rem;
+			cursor: pointer;
+			font-weight: 600;
+			font-size: 0.9rem;
+		}
+		.modal-save-button { /* Style for "Add Prompt" button */
+			background-color: #3b82f6;
+			color: white;
+		}
+		.modal-save-button:hover {
+			background-color: #2563eb;
+		}
+		.modal-delete-button { /* Style for "Delete" button in list */
+			background-color: #ef4444;
+			color: white;
+			padding: 0.4rem 0.8rem;
+			font-size: 0.8rem;
+		}
+		.modal-delete-button:hover {
+			background-color: #dc2626;
+		}
+		.modal-close-button {
+			background-color: #e5e7eb;
+			color: #374151;
+		}
+		.modal-close-button:hover {
+			background-color: #d1d5db;
+		}
+
+		.close-button-x { /* Style for the 'X' button */
+			color: #aaa;
+			position: absolute;
+			top: 10px;
+			right: 15px;
+			font-size: 28px;
+			font-weight: bold;
+		}
+
+		.close-button-x:hover,
+		.close-button-x:focus {
+			color: black;
+			text-decoration: none;
+			cursor: pointer;
+		}
+
+		#custom-prompts-list-container ul {
+			list-style-type: none;
+			padding-left: 0;
+			max-height: 200px; /* Limit height and make scrollable if many prompts */
+			overflow-y: auto;
+			border: 1px solid #e5e7eb;
+			border-radius: 0.375rem;
+		}
+		#custom-prompts-list-container li {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding: 0.75rem 1rem;
+			border-bottom: 1px solid #f0f2f5;
+		}
+		#custom-prompts-list-container li:last-child {
+			border-bottom: none;
+		}
+		#custom-prompts-list-container .prompt-name-modal {
+			flex-grow: 1;
+			margin-right: 1rem;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			font-size: 0.9rem;
+		}
+		#no-custom-prompts-message {
+			padding: 1rem;
+			text-align: center;
+			color: #6b7280;
+			font-size: 0.9rem;
+			border: 1px dashed #d1d5db;
+			border-radius: 0.375rem;
+		}
+
 	</style>
 </head>
 <body>
-	<div class="container">
-		<div id="chat-container" class="chat-container">
-			<!-- Messages will be appended here -->
-			<div id="typing-indicator" class="typing-indicator" style="display: none;">
-				<span></span>
-				<span></span>
-				<span></span>
+	<div class="page-wrapper">
+		<div id="history-sidebar" class="history-sidebar">
+			<h4>Chat History</h4>
+			<div id="history-list">
+				<!-- History items will be populated here by JavaScript -->
 			</div>
 		</div>
-		<form id="input-form" class="input-form">
-			<input type="text" id="message-input" class="message-input" placeholder="Type your message..." autocomplete="off">
-			<button type="submit" class="send-button">Send</button>
-		</form>
+		<div class="container"> <!-- Main content area -->
+			<div class="header-controls">
+				<button id="new-chat-button" class="header-button" title="New Chat">➕ New Chat</button>
+				<select id="prompt-selector" title="Select System Prompt"></select>
+				<div id="model-info" class="model-info">Connecting to Ollama...</div>
+				<button id="settings-button" class="settings-button header-button" title="Settings">⚙️</button>
+			</div>
+			<div id="chat-container" class="chat-container">
+				<!-- Typing indicator will be re-added by JS if cleared -->
+			</div>
+			<div class="input-area-wrapper">
+				<div id="image-preview-container">
+					<img id="image-preview-img" src="#" alt="Image preview" />
+					<button id="remove-image-button" title="Remove image">&times;</button>
+				</div>
+				<form id="input-form" class="input-form">
+					<input type="file" id="image-input" accept="image/*" style="display: none;">
+					<button type="button" id="attach-image-button" title="Attach image">📎</button>
+					<input type="text" id="message-input" class="message-input" placeholder="Type your message..." autocomplete="off">
+					<button type="submit" class="send-button">Send</button>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<!-- Settings Modal -->
+	<div id="settings-modal" class="modal">
+		<div class="modal-content">
+			<span class="close-button-x">&times;</span>
+			<h3>Settings - Manage Custom Prompts</h3>
+
+			<div id="manage-custom-prompts-section">
+				<h4>Your Custom Prompts</h4>
+				<div id="custom-prompts-list-container">
+					<p id="no-custom-prompts-message" style="display: none;">You haven't added any custom prompts yet.</p>
+					<!-- Custom prompts will be listed here by JS -->
+				</div>
+
+				<hr style="margin: 1.5rem 0;">
+
+				<h4>Add New Custom Prompt</h4>
+				<form id="add-custom-prompt-form">
+					<div>
+						<label for="new-custom-prompt-name">Prompt Name:</label>
+						<input type="text" id="new-custom-prompt-name" required>
+					</div>
+					<div>
+						<label for="new-custom-prompt-text">Prompt Text:</label>
+						<textarea id="new-custom-prompt-text" rows="4" required placeholder="e.g., You are a helpful assistant specializing in Astro."></textarea>
+					</div>
+					<button type="submit" class="modal-save-button" style="margin-top: 1rem;">Add Prompt</button>
+				</form>
+			</div>
+
+			<div class="modal-buttons">
+				<button id="modal-close-settings-button" class="modal-close-button">Close</button>
+			</div>
+		</div>
 	</div>
 
 	<script>
 		const chatContainer = document.getElementById('chat-container');
 		const messageInput = document.getElementById('message-input');
 		const form = document.getElementById('input-form');
-		const typingIndicator = document.getElementById('typing-indicator');
+		let typingIndicator = null; 
+		const modelInfoDiv = document.getElementById('model-info');
+		const settingsButton = document.getElementById('settings-button');
+		const newChatButton = document.getElementById('new-chat-button');
+		let historySidebarList = null;
 		
-		// Ensure this matches your Ollama API endpoint.
-		const OLLAMA_BASE_URL = 'http://localhost:11434'; // Changed for clarity
+		// Image input elements
+		let imageInput = null;
+		let attachImageButton = null;
+		let imagePreviewContainer = null;
+		let imagePreviewImg = null;
+		let removeImageButton = null;
+		let currentSelectedImageBase64 = null;
+
+
+		// Settings Modal Elements
+		let settingsModal = null;
+		let closeSettingsButtonX = null;
+		let modalCloseSettingsButton = null;
+		// Elements for managing custom prompts in modal
+		let manageCustomPromptsSection = null;
+		let customPromptsListContainer = null;
+		let noCustomPromptsMessage = null;
+		let addCustomPromptForm = null;
+		let newCustomPromptNameInput = null;
+		let newCustomPromptTextInput = null;
+
+
+		// Prompt Selector
+		let promptSelector = null;
+
+		const OLLAMA_BASE_URL = 'http://localhost:11434';
 		const OLLAMA_API_GENERATE_URL = `${OLLAMA_BASE_URL}/api/generate`; 
 		const OLLAMA_API_TAGS_URL = `${OLLAMA_BASE_URL}/api/tags`;
 		
-		let OLLAMA_MODEL = ''; // Will be set dynamically
+		let OLLAMA_MODEL = '';
+
+		const CHAT_HISTORY_KEY = 'ollamaChatHistory';
+		const MAX_HISTORY_ITEMS = 10; // Increased max history items
+		let chatHistory = []; 
+		let currentConversation = null;
+		
+		// System Prompt Management
+		let customSystemPrompt = ''; // This will hold the ACTIVE system prompt text
+		let userCustomPrompts = []; // Array to hold user-defined custom prompts {id, name, prompt}
+		
+		const USER_CUSTOM_PROMPTS_KEY = 'ollamaUserCustomPrompts'; // localStorage key for user's custom prompts
+		const SELECTED_PROMPT_ID_KEY = 'ollamaSelectedPromptId'; // localStorage key for selected prompt ID
+
+		const PREDEFINED_PROMPTS = [
+			{ id: "default-assistant", name: "Default Assistant", prompt: "You are a helpful assistant." },
+			{ id: "concise-responder", name: "Concise Responder", prompt: "You are a helpful assistant. Respond in short, concise sentences." },
+			{ id: "code-helper", name: "Code Helper", prompt: "You are an expert programming assistant. Provide code examples when relevant." },
+			{ id: "sarcastic-bot", name: "Sarcastic Bot", prompt: "You are a witty and slightly sarcastic assistant." }
+		];
+
+		function imageToBase64(file) {
+			return new Promise((resolve, reject) => {
+				const reader = new FileReader();
+				reader.onload = () => {
+					// reader.result is "data:image/jpeg;base64,actualbase64string..."
+					// Ollama API expects just "actualbase64string"
+					const base64String = reader.result.split(',')[1];
+					resolve(base64String);
+				};
+				reader.onerror = error => reject(error);
+				reader.readAsDataURL(file);
+			});
+		}
+
+		function clearImageSelection() {
+			currentSelectedImageBase64 = null;
+			if (imageInput) imageInput.value = null; // Reset file input
+			if (imagePreviewContainer) imagePreviewContainer.style.display = 'none';
+			if (imagePreviewImg) imagePreviewImg.src = '#';
+		}
+
+		function createTypingIndicator() {
+			if (document.getElementById('typing-indicator')) {
+				typingIndicator = document.getElementById('typing-indicator');
+				typingIndicator.style.display = 'none';
+				return typingIndicator;
+			}
+			const indicator = document.createElement('div');
+			indicator.id = 'typing-indicator';
+			indicator.classList.add('typing-indicator');
+			indicator.style.display = 'none';
+			indicator.innerHTML = `
+				<span class="message-icon">🤖</span>
+				<div class="typing-dots">
+					<span></span><span></span><span></span>
+				</div>
+			`;
+			return indicator;
+		}
+		
+		function updateModelInfoDisplay() {
+			let statusText = `Model: ${OLLAMA_MODEL || 'N/A'}`;
+			if (currentConversation && currentConversation.name) {
+				statusText = `${currentConversation.name} | ${statusText}`;
+			}
+			modelInfoDiv.textContent = statusText;
+			modelInfoDiv.title = statusText;
+		}
 
 		async function fetchAndSetOllamaModel() {
 			try {
@@ -147,125 +698,596 @@
 				}
 				const data = await response.json();
 				if (data.models && data.models.length > 0) {
-					OLLAMA_MODEL = data.models[0].name; // Use the first available model
+					// Try to find a multimodal model first, e.g., one containing "llava"
+					const multimodalModel = data.models.find(m => m.name.toLowerCase().includes('llava'));
+					if (multimodalModel) {
+						OLLAMA_MODEL = multimodalModel.name;
+					} else {
+						OLLAMA_MODEL = data.models[0].name; // Fallback to the first available model
+						console.warn("No 'llava' model found. Using first available model. Image features might not work as expected.");
+					}
 					console.log(`Using Ollama model: ${OLLAMA_MODEL}`);
-					// Optional: Update UI to show which model is being used
-					// addMessageToUI(`Using model: ${OLLAMA_MODEL}`, "bot-message"); 
 				} else {
-					throw new Error('No Ollama models found. Please make sure you have models installed.');
+					OLLAMA_MODEL = '';
+					throw new Error('No Ollama models found. Please install or run models with Ollama.');
 				}
 			} catch (error) {
 				console.error('Error setting up Ollama model:', error);
-				addMessageToUI(`Error: Could not connect to Ollama or no models found. ${error.message}`, 'error-message');
-				// Disable input if no model is available
+				OLLAMA_MODEL = '';
+				modelInfoDiv.style.color = '#b91c1c'; // Error color
+				addMessageToUI(`Error: Could not connect to Ollama or no models found. ${error.message}`, 'error-message', false, { addToHistory: true });
 				messageInput.disabled = true;
 				form.querySelector('button[type="submit"]').disabled = true;
+			} finally {
+				updateModelInfoDisplay();
 			}
 		}
 
-		// Call this function when the page loads
-		document.addEventListener('DOMContentLoaded', fetchAndSetOllamaModel);
+		function loadChatHistoryFromStorage() {
+			const storedHistory = localStorage.getItem(CHAT_HISTORY_KEY);
+			if (storedHistory) {
+				try {
+					chatHistory = JSON.parse(storedHistory);
+					chatHistory.forEach(conv => {
+						if (!conv.messages) conv.messages = [];
+					});
+				} catch (e) {
+					console.error("Error parsing chat history from localStorage:", e);
+					chatHistory = [];
+				}
+			} else {
+				chatHistory = [];
+			}
+			chatHistory.sort((a, b) => b.lastModified - a.lastModified);
+		}
+
+		function saveChatHistoryToStorage() {
+			localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(chatHistory));
+		}
+
+		function addCurrentConversationToHistoryList() {
+			if (!currentConversation) return;
+			
+			const existingIndex = chatHistory.findIndex(conv => conv.id === currentConversation.id);
+			if (existingIndex > -1) {
+				chatHistory.splice(existingIndex, 1);
+			}
+			
+			const conversationToStore = JSON.parse(JSON.stringify(currentConversation));
+			chatHistory.unshift(conversationToStore); 
+			
+			chatHistory.sort((a, b) => b.lastModified - a.lastModified);
+
+			if (chatHistory.length > MAX_HISTORY_ITEMS) {
+				chatHistory = chatHistory.slice(0, MAX_HISTORY_ITEMS);
+			}
+		}
+		
+		function saveCurrentConversationState() {
+			if (!currentConversation || !currentConversation.id) return;
+			currentConversation.lastModified = Date.now();
+			addCurrentConversationToHistoryList();
+			saveChatHistoryToStorage();
+			updateModelInfoDisplay();
+			renderChatHistorySidebar();
+		}
+
+		function clearChatUI() {
+			const messages = chatContainer.querySelectorAll('.message');
+			messages.forEach(msg => msg.remove());
+			if (typingIndicator) {
+				chatContainer.appendChild(typingIndicator);
+				typingIndicator.style.display = 'none';
+			}
+		}
+
+		function renderChatHistorySidebar() {
+			if (!historySidebarList) return;
+			historySidebarList.innerHTML = ''; 
+
+			if (chatHistory.length === 0) {
+				const noHistoryItem = document.createElement('div');
+				noHistoryItem.textContent = "No past chats.";
+				noHistoryItem.classList.add('no-history-message');
+				historySidebarList.appendChild(noHistoryItem);
+				return;
+			}
+
+			chatHistory.forEach(conv => {
+				const historyItem = document.createElement('div');
+				historyItem.classList.add('history-item');
+				historyItem.textContent = conv.name || `Chat ${new Date(parseInt(conv.id)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+				historyItem.title = conv.name || `Chat ${new Date(parseInt(conv.id)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
+				historyItem.setAttribute('data-id', conv.id);
+
+				if (currentConversation && conv.id === currentConversation.id) {
+					historyItem.classList.add('active');
+				}
+
+				historyItem.addEventListener('click', () => {
+					if (currentConversation && currentConversation.id === conv.id) return; 
+
+					const selectedConv = chatHistory.find(c => c.id === conv.id);
+					if (selectedConv) {
+						if (currentConversation && currentConversation.id !== selectedConv.id && (currentConversation.messages && currentConversation.messages.length > 0 || currentConversation.images && currentConversation.images.length > 0)) {
+							saveCurrentConversationState(); 
+						}
+						displayConversation(selectedConv);
+					}
+				});
+				historySidebarList.appendChild(historyItem);
+			});
+		}
+
+		function displayConversation(conversation) {
+			clearChatUI();
+			clearImageSelection(); // Clear any pending image
+			currentConversation = JSON.parse(JSON.stringify(conversation));
+			if (!currentConversation.messages) currentConversation.messages = [];
+
+			currentConversation.messages.forEach(msg => {
+				let messageClass = 'bot-message';
+				if (msg.role === 'user') messageClass = 'user-message';
+				else if (msg.role === 'error') messageClass = 'error-message';
+				addMessageToUI(msg.content, messageClass, msg.role === 'user', { 
+					explicitTimestamp: msg.timestamp, 
+					addToHistory: false,
+					images: msg.images // Pass images from history
+				});
+			});
+			scrollToBottom();
+			updateModelInfoDisplay();
+			renderChatHistorySidebar();
+		}
+
+		function startNewChatSession(savePrevious = true) {
+			if (savePrevious && currentConversation && ((currentConversation.messages && currentConversation.messages.length > 0) || (currentConversation.images && currentConversation.images.length > 0))) {
+				saveCurrentConversationState();
+			}
+			
+			clearChatUI();
+			clearImageSelection();
+			
+			const newChatId = Date.now().toString();
+			const newChatName = `Chat ${new Date(parseInt(newChatId)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+			currentConversation = {
+				id: newChatId,
+				name: newChatName,
+				messages: [], // messages will store text and image refs
+				lastModified: Date.now()
+			};
+			
+			saveCurrentConversationState();
+			messageInput.disabled = !OLLAMA_MODEL;
+			form.querySelector('button[type="submit"]').disabled = !OLLAMA_MODEL;
+			messageInput.focus();
+			console.log("Started new chat:", currentConversation.id);
+		}
+
+		function loadUserCustomPrompts() {
+			const stored = localStorage.getItem(USER_CUSTOM_PROMPTS_KEY);
+			if (stored) {
+				try {
+					userCustomPrompts = JSON.parse(stored);
+				} catch (e) {
+					console.error("Error parsing user custom prompts:", e);
+					userCustomPrompts = [];
+				}
+			} else {
+				userCustomPrompts = [];
+			}
+		}
+
+		function saveUserCustomPrompts() {
+			localStorage.setItem(USER_CUSTOM_PROMPTS_KEY, JSON.stringify(userCustomPrompts));
+		}
+
+		function updatePromptSelectorWithOptions() {
+			const previouslySelectedId = promptSelector.value || localStorage.getItem(SELECTED_PROMPT_ID_KEY);
+			promptSelector.innerHTML = ''; // Clear existing options
+
+			PREDEFINED_PROMPTS.forEach(p => {
+				const option = document.createElement('option');
+				option.value = p.id;
+				option.textContent = p.name;
+				promptSelector.appendChild(option);
+			});
+
+			if (userCustomPrompts.length > 0) {
+				const optgroup = document.createElement('optgroup');
+				optgroup.label = "Your Custom Prompts";
+				userCustomPrompts.forEach(p => {
+					const option = document.createElement('option');
+					option.value = p.id;
+					option.textContent = p.name;
+					optgroup.appendChild(option);
+				});
+				promptSelector.appendChild(optgroup);
+			}
+
+			if (previouslySelectedId && promptSelector.querySelector(`option[value="${previouslySelectedId}"]`)) {
+				promptSelector.value = previouslySelectedId;
+			} else if (PREDEFINED_PROMPTS.length > 0) {
+				promptSelector.value = PREDEFINED_PROMPTS[0].id; // Default to first predefined
+			}
+			setActiveSystemPrompt(); 
+		}
+		
+		function setActiveSystemPrompt() {
+			const selectedId = promptSelector.value;
+			localStorage.setItem(SELECTED_PROMPT_ID_KEY, selectedId);
+
+			let foundPrompt = PREDEFINED_PROMPTS.find(p => p.id === selectedId);
+			if (foundPrompt) {
+				customSystemPrompt = foundPrompt.prompt;
+			} else {
+				foundPrompt = userCustomPrompts.find(p => p.id === selectedId);
+				if (foundPrompt) {
+					customSystemPrompt = foundPrompt.prompt;
+				} else {
+					// Fallback if selectedId is somehow invalid
+					console.warn(`Selected prompt ID "${selectedId}" not found. Defaulting.`);
+					if (PREDEFINED_PROMPTS.length > 0) {
+						customSystemPrompt = PREDEFINED_PROMPTS[0].prompt;
+						promptSelector.value = PREDEFINED_PROMPTS[0].id; // Ensure selector reflects this
+						localStorage.setItem(SELECTED_PROMPT_ID_KEY, PREDEFINED_PROMPTS[0].id);
+					} else {
+						customSystemPrompt = ""; // No prompts available
+					}
+				}
+			}
+			console.log("Active system prompt set to (ID:", selectedId, "):", customSystemPrompt);
+		}
+
+		function renderCustomPromptsInModal() {
+			if (!customPromptsListContainer || !noCustomPromptsMessage) return;
+
+			customPromptsListContainer.innerHTML = ''; 
+			if (userCustomPrompts.length === 0) {
+				noCustomPromptsMessage.style.display = 'block';
+				return;
+			}
+			noCustomPromptsMessage.style.display = 'none';
+
+			const ul = document.createElement('ul');
+			userCustomPrompts.forEach(prompt => {
+				const li = document.createElement('li');
+				
+				const nameSpan = document.createElement('span');
+				nameSpan.textContent = prompt.name;
+				nameSpan.title = prompt.prompt; 
+				nameSpan.classList.add('prompt-name-modal');
+
+				const deleteButton = document.createElement('button');
+				deleteButton.textContent = 'Delete';
+				deleteButton.classList.add('modal-delete-button');
+				deleteButton.onclick = () => {
+					if (confirm(`Are you sure you want to delete the prompt "${prompt.name}"?`)) {
+						userCustomPrompts = userCustomPrompts.filter(p => p.id !== prompt.id);
+						saveUserCustomPrompts();
+						renderCustomPromptsInModal(); 
+						updatePromptSelectorWithOptions(); 
+					}
+				};
+
+				li.appendChild(nameSpan);
+				li.appendChild(deleteButton);
+				ul.appendChild(li);
+			});
+			customPromptsListContainer.appendChild(ul);
+		}
+		
+		async function initializeApp() {
+			typingIndicator = createTypingIndicator();
+			chatContainer.appendChild(typingIndicator);
+			historySidebarList = document.getElementById('history-list');
+			promptSelector = document.getElementById('prompt-selector');
+
+			// Image input elements
+			imageInput = document.getElementById('image-input');
+			attachImageButton = document.getElementById('attach-image-button');
+			imagePreviewContainer = document.getElementById('image-preview-container');
+			imagePreviewImg = document.getElementById('image-preview-img');
+			removeImageButton = document.getElementById('remove-image-button');
+
+			// Initialize Settings Modal Elements
+			settingsModal = document.getElementById('settings-modal');
+			closeSettingsButtonX = settingsModal.querySelector('.close-button-x');
+			modalCloseSettingsButton = document.getElementById('modal-close-settings-button');
+			
+			manageCustomPromptsSection = document.getElementById('manage-custom-prompts-section');
+			customPromptsListContainer = document.getElementById('custom-prompts-list-container');
+			noCustomPromptsMessage = document.getElementById('no-custom-prompts-message');
+			addCustomPromptForm = document.getElementById('add-custom-prompt-form');
+			newCustomPromptNameInput = document.getElementById('new-custom-prompt-name');
+			newCustomPromptTextInput = document.getElementById('new-custom-prompt-text');
+
+			loadUserCustomPrompts();
+			updatePromptSelectorWithOptions(); // This also calls setActiveSystemPrompt
+
+			await fetchAndSetOllamaModel();
+			loadChatHistoryFromStorage(); 
+
+			if (chatHistory.length > 0) {
+				displayConversation(chatHistory[0]); 
+			} else {
+				startNewChatSession(false); 
+			}
+
+			promptSelector.addEventListener('change', setActiveSystemPrompt);
+
+			settingsButton.addEventListener('click', () => {
+				renderCustomPromptsInModal();
+				if(settingsModal) settingsModal.style.display = 'block';
+			});
+
+			closeSettingsButtonX.addEventListener('click', () => {
+				if(settingsModal) settingsModal.style.display = 'none';
+			});
+			modalCloseSettingsButton.addEventListener('click', () => {
+				if(settingsModal) settingsModal.style.display = 'none';
+			});
+			
+			if (addCustomPromptForm) {
+				addCustomPromptForm.addEventListener('submit', (e) => {
+					e.preventDefault();
+					const name = newCustomPromptNameInput.value.trim();
+					const text = newCustomPromptTextInput.value.trim();
+
+					if (!name || !text) {
+						alert("Prompt name and text cannot be empty.");
+						return;
+					}
+					if (userCustomPrompts.find(p => p.name.toLowerCase() === name.toLowerCase()) || PREDEFINED_PROMPTS.find(p => p.name.toLowerCase() === name.toLowerCase())) {
+						alert("A prompt with this name already exists (either custom or predefined). Please choose a unique name.");
+						return;
+					}
+
+					const newPrompt = {
+						id: `custom-${Date.now()}`,
+						name: name,
+						prompt: text
+					};
+					userCustomPrompts.push(newPrompt);
+					saveUserCustomPrompts();
+					renderCustomPromptsInModal();
+					updatePromptSelectorWithOptions();
+
+					promptSelector.value = newPrompt.id; // Select the new prompt
+					setActiveSystemPrompt(); // Activate it
+
+					newCustomPromptNameInput.value = '';
+					newCustomPromptTextInput.value = '';
+					// Add a small success message/animation if desired
+					const addButton = addCustomPromptForm.querySelector('button[type="submit"]');
+					if (addButton) {
+						const originalText = addButton.textContent;
+						addButton.textContent = "Added!";
+						addButton.disabled = true;
+						setTimeout(() => {
+							addButton.textContent = originalText;
+							addButton.disabled = false;
+						}, 1500);
+					}
+				});
+			}
+
+			// Image attachment listeners
+			attachImageButton.addEventListener('click', () => imageInput.click());
+			imageInput.addEventListener('change', async (event) => {
+				const file = event.target.files[0];
+				if (file) {
+					try {
+						currentSelectedImageBase64 = await imageToBase64(file);
+						imagePreviewImg.src = URL.createObjectURL(file); // For preview
+						imagePreviewContainer.style.display = 'block';
+					} catch (error) {
+						console.error("Error processing image:", error);
+						addMessageToUI("Error processing image. Please try another.", 'error-message', false, {addToHistory: false});
+						clearImageSelection();
+					}
+				}
+			});
+			removeImageButton.addEventListener('click', clearImageSelection);
+
+
+			window.addEventListener('click', (event) => {
+				if (event.target == settingsModal) {
+					settingsModal.style.display = 'none';
+				}
+			});
+		}
+
+		document.addEventListener('DOMContentLoaded', initializeApp);
+
+		newChatButton.addEventListener('click', () => {
+			startNewChatSession(true);
+		});
+
 
 		form.addEventListener('submit', async (e) => {
 			e.preventDefault();
 			const userInput = messageInput.value.trim();
-			if (!userInput) return;
-			if (!OLLAMA_MODEL) { // Check if a model has been set
-				addMessageToUI('Error: Ollama model not set. Please check console for errors.', 'error-message');
+			
+			if (!userInput && !currentSelectedImageBase64) return; // Need text or image
+
+			if (!OLLAMA_MODEL) {
+				addMessageToUI('Error: Ollama model not set. Cannot send message.', 'error-message', false, { addToHistory: true });
 				return;
 			}
+			if (!currentConversation) {
+				startNewChatSession(false);
+			}
 
-			addMessageToUI(userInput, 'user-message');
+			const imagesToSend = currentSelectedImageBase64 ? [currentSelectedImageBase64] : null;
+			addMessageToUI(userInput, 'user-message', true, { addToHistory: true, images: imagesToSend });
+			
 			messageInput.value = '';
-			typingIndicator.style.display = 'flex';
+			clearImageSelection(); // Clear preview and stored base64 after adding to UI
+
+			if(typingIndicator) typingIndicator.style.display = 'flex';
 			scrollToBottom();
 
-			let botMessageElement = null;
+			let botMessageTextContentElement = null;
 			let accumulatedResponse = "";
+			let botMessageEntryForHistory = null;
+			let botMessageTimestamp = null;
 
 			try {
-				const response = await fetch(OLLAMA_API_GENERATE_URL, { // Use the renamed constant
+				const requestBody = {
+					model: OLLAMA_MODEL,
+					prompt: userInput,
+					stream: true,
+				};
+				if (customSystemPrompt) { 
+					requestBody.system = customSystemPrompt;
+				}
+				if (imagesToSend) { // Add images to the request if present
+					requestBody.images = imagesToSend;
+				}
+
+
+				const response = await fetch(OLLAMA_API_GENERATE_URL, {
 					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						model: OLLAMA_MODEL, // Use the dynamically set model
-						prompt: userInput,
-						stream: true, // Enable streaming
-					}),
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(requestBody),
 				});
 
 				if (!response.ok) {
 					const errorBody = await response.text();
 					throw new Error(`API error: ${response.status} ${response.statusText}. Details: ${errorBody}`);
 				}
-
-				// Create the bot message element once
-				botMessageElement = document.createElement('div');
-				botMessageElement.classList.add('message', 'bot-message');
-				chatContainer.insertBefore(botMessageElement, typingIndicator);
-
+				
 				const reader = response.body.getReader();
 				const decoder = new TextDecoder();
+				let firstChunkProcessed = false;
 
 				while (true) {
 					const { value, done } = await reader.read();
 					if (done) break;
 					
 					const chunk = decoder.decode(value, { stream: true });
-					// Ollama streams JSON objects separated by newlines
 					const jsonResponses = chunk.split('\n').filter(line => line.trim() !== '');
 
 					for (const jsonResponse of jsonResponses) {
 						try {
 							const parsed = JSON.parse(jsonResponse);
 							if (parsed.response) {
+								if (!firstChunkProcessed) {
+									const UIMessage = addMessageToUI("", 'bot-message', false, { addToHistory: false });
+									botMessageTextContentElement = UIMessage.textContentElement;
+									botMessageTimestamp = UIMessage.timestamp;
+
+									botMessageEntryForHistory = { role: 'bot', content: "", timestamp: botMessageTimestamp };
+									currentConversation.messages.push(botMessageEntryForHistory);
+									firstChunkProcessed = true;
+								}
 								accumulatedResponse += parsed.response;
-								botMessageElement.textContent = accumulatedResponse; // Update content
+								if (botMessageTextContentElement) {
+									botMessageTextContentElement.textContent = accumulatedResponse;
+								}
+								if (botMessageEntryForHistory) {
+									botMessageEntryForHistory.content = accumulatedResponse;
+								}
 								scrollToBottom();
 							}
 							if (parsed.error) {
 								throw new Error(`Ollama error: ${parsed.error}`);
 							}
-							if (parsed.done && parsed.status === 'success') {
-								// Stream finished successfully for this request
-							}
 						} catch (e) {
 							console.warn('Error parsing JSON chunk:', e, jsonResponse);
-							// Potentially display a partial error or ignore if minor
 						}
 					}
 				}
+				if (firstChunkProcessed) { 
+					saveCurrentConversationState();
+				}
 			} catch (error) {
 				console.error('Error sending message or processing stream:', error);
-				if (botMessageElement && !accumulatedResponse) {
-					// If bot message element was created but no response came, remove it or set error
-					botMessageElement.remove(); // Or update its content/style for error
-				}
-				addMessageToUI(`Error: ${error.message}`, 'error-message');
+				addMessageToUI(`Error: ${error.message}`, 'error-message', false, { addToHistory: true });
 			} finally {
-				typingIndicator.style.display = 'none';
+				if(typingIndicator) typingIndicator.style.display = 'none';
+				if (botMessageEntryForHistory && botMessageEntryForHistory.content) { 
+					saveCurrentConversationState();
+				}
 				scrollToBottom();
 			}
 		});
 
-		function addMessageToUI(text, className) {
+		function addMessageToUI(text, className, isUser, options = {}) {
+			const { explicitTimestamp = null, addToHistory = true, images = null } = options;
+
 			const messageElement = document.createElement('div');
 			messageElement.classList.add('message', className);
-			messageElement.textContent = text;
-			// Insert the new message before the typing indicator
-			chatContainer.insertBefore(messageElement, typingIndicator);
+
+			const iconElement = document.createElement('span');
+			iconElement.classList.add('message-icon');
+			iconElement.textContent = isUser ? '👤' : (className === 'error-message' ? '⚠️' : '🤖');
+
+			const messageBubble = document.createElement('div');
+			messageBubble.classList.add('message-bubble');
+
+			const textContentElement = document.createElement('div');
+			textContentElement.classList.add('message-text-content');
+			textContentElement.textContent = text || ""; // Ensure textContent is set, even if empty for streaming
+			messageBubble.appendChild(textContentElement); // Append textContentElement regardless of initial text
+			
+			// Add images if any
+			if (images && images.length > 0) {
+				images.forEach(base64Image => {
+					const imgElement = document.createElement('img');
+					imgElement.src = `data:image/jpeg;base64,${base64Image}`; // Assuming jpeg, adjust if other types are common
+					imgElement.alt = "User uploaded image";
+					imgElement.classList.add('message-image');
+					messageBubble.appendChild(imgElement);
+				});
+			}
+
+
+			const metaElement = document.createElement('div');
+			metaElement.classList.add('message-meta');
+
+			const timestampElement = document.createElement('span');
+			timestampElement.classList.add('message-timestamp');
+			const displayTimestamp = explicitTimestamp || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+			timestampElement.textContent = displayTimestamp;
+
+			metaElement.appendChild(timestampElement);
+			messageBubble.appendChild(metaElement); // Append meta after text and images
+			messageElement.appendChild(iconElement);
+			messageElement.appendChild(messageBubble);
+
+			if (typingIndicator && typingIndicator.parentNode === chatContainer) {
+				chatContainer.insertBefore(messageElement, typingIndicator);
+			} else {
+				chatContainer.appendChild(messageElement);
+			}
+			
+			if (addToHistory && currentConversation) {
+				const messageForHistory = {
+					role: isUser ? 'user' : (className === 'error-message' ? 'error' : 'bot'),
+					content: text, // Text content
+					timestamp: displayTimestamp 
+				};
+				if (images && images.length > 0) { // Add images to history object
+					messageForHistory.images = images;
+				}
+
+				if (!currentConversation.messages) currentConversation.messages = [];
+				currentConversation.messages.push(messageForHistory);
+				
+				if (isUser || className === 'error-message') {
+					saveCurrentConversationState();
+				}
+			}
+			
 			scrollToBottom();
+			return { messageElement, textContentElement, timestamp: displayTimestamp };
 		}
 
 		function scrollToBottom() {
 			chatContainer.scrollTop = chatContainer.scrollHeight;
 		}
-
-		// Optional: Add a welcome message or initial state
-		// addMessageToUI("Hello! How can I help you today?", "bot-message");
-
 	</script>
 </body>
 </html>
