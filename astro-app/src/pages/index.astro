@@ -1,0 +1,271 @@
+---
+// index.astro - Ollama chatbot interface
+---
+
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Ollama Chatbot</title>
+	<style>
+		body {
+			font-family: 'Inter', system-ui, sans-serif;
+			background-color: #f9fafb;
+			margin: 0;
+			padding: 0;
+			color: #374151;
+		}
+		.container {
+			max-width: 800px;
+			margin: 0 auto;
+			padding: 2rem 1rem;
+			height: 100vh;
+			display: flex;
+			flex-direction: column;
+			box-sizing: border-box;
+		}
+		.chat-container {
+			flex-grow: 1;
+			overflow-y: auto;
+			padding: 1rem;
+			background-color: white;
+			border-radius: 0.5rem;
+			box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+			margin-bottom: 1rem;
+			display: flex;
+			flex-direction: column;
+		}
+		.message {
+			padding: 0.75rem 1rem;
+			border-radius: 0.5rem;
+			margin-bottom: 0.75rem;
+			max-width: 80%;
+			line-height: 1.4;
+		}
+		.user-message {
+			background-color: #3b82f6;
+			color: white;
+			align-self: flex-end;
+		}
+		.bot-message {
+			background-color: #f3f4f6;
+			align-self: flex-start;
+		}
+		.error-message {
+			background-color: #fee2e2; /* Light red for errors */
+			color: #b91c1c; /* Darker red text for errors */
+			align-self: flex-start;
+		}
+		.input-form {
+			display: flex;
+			gap: 0.5rem;
+		}
+		.message-input {
+			flex-grow: 1;
+			padding: 0.75rem 1rem;
+			border: 1px solid #d1d5db;
+			border-radius: 0.5rem;
+			font-size: 1rem;
+		}
+		.send-button {
+			padding: 0.75rem 1.5rem;
+			background-color: #3b82f6;
+			color: white;
+			border: none;
+			border-radius: 0.5rem;
+			cursor: pointer;
+			font-weight: 600;
+		}
+		.send-button:hover {
+			background-color: #2563eb;
+		}
+		.typing-indicator {
+			display: flex; /* Initially 'none', JS will change to 'flex' */
+			padding: 0.5rem;
+			margin-bottom: 0.75rem;
+			align-self: flex-start;
+		}
+		.typing-indicator span {
+			height: 8px;
+			width: 8px;
+			background-color: #9ca3af;
+			border-radius: 50%;
+			display: inline-block;
+			margin: 0 2px;
+			animation: bounce 1.4s infinite ease-in-out both;
+		}
+		.typing-indicator span:nth-child(1) {
+			animation-delay: -0.32s;
+		}
+		.typing-indicator span:nth-child(2) {
+			animation-delay: -0.16s;
+		}
+		@keyframes bounce {
+			0%, 80%, 100% {
+				transform: scale(0);
+			}
+			40% {
+				transform: scale(1.0);
+			}
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<div id="chat-container" class="chat-container">
+			<!-- Messages will be appended here -->
+			<div id="typing-indicator" class="typing-indicator" style="display: none;">
+				<span></span>
+				<span></span>
+				<span></span>
+			</div>
+		</div>
+		<form id="input-form" class="input-form">
+			<input type="text" id="message-input" class="message-input" placeholder="Type your message..." autocomplete="off">
+			<button type="submit" class="send-button">Send</button>
+		</form>
+	</div>
+
+	<script>
+		const chatContainer = document.getElementById('chat-container');
+		const messageInput = document.getElementById('message-input');
+		const form = document.getElementById('input-form');
+		const typingIndicator = document.getElementById('typing-indicator');
+		
+		// Ensure this matches your Ollama API endpoint.
+		const OLLAMA_BASE_URL = 'http://localhost:11434'; // Changed for clarity
+		const OLLAMA_API_GENERATE_URL = `${OLLAMA_BASE_URL}/api/generate`; 
+		const OLLAMA_API_TAGS_URL = `${OLLAMA_BASE_URL}/api/tags`;
+		
+		let OLLAMA_MODEL = ''; // Will be set dynamically
+
+		async function fetchAndSetOllamaModel() {
+			try {
+				const response = await fetch(OLLAMA_API_TAGS_URL);
+				if (!response.ok) {
+					throw new Error(`Failed to fetch models: ${response.status} ${response.statusText}`);
+				}
+				const data = await response.json();
+				if (data.models && data.models.length > 0) {
+					OLLAMA_MODEL = data.models[0].name; // Use the first available model
+					console.log(`Using Ollama model: ${OLLAMA_MODEL}`);
+					// Optional: Update UI to show which model is being used
+					// addMessageToUI(`Using model: ${OLLAMA_MODEL}`, "bot-message"); 
+				} else {
+					throw new Error('No Ollama models found. Please make sure you have models installed.');
+				}
+			} catch (error) {
+				console.error('Error setting up Ollama model:', error);
+				addMessageToUI(`Error: Could not connect to Ollama or no models found. ${error.message}`, 'error-message');
+				// Disable input if no model is available
+				messageInput.disabled = true;
+				form.querySelector('button[type="submit"]').disabled = true;
+			}
+		}
+
+		// Call this function when the page loads
+		document.addEventListener('DOMContentLoaded', fetchAndSetOllamaModel);
+
+		form.addEventListener('submit', async (e) => {
+			e.preventDefault();
+			const userInput = messageInput.value.trim();
+			if (!userInput) return;
+			if (!OLLAMA_MODEL) { // Check if a model has been set
+				addMessageToUI('Error: Ollama model not set. Please check console for errors.', 'error-message');
+				return;
+			}
+
+			addMessageToUI(userInput, 'user-message');
+			messageInput.value = '';
+			typingIndicator.style.display = 'flex';
+			scrollToBottom();
+
+			let botMessageElement = null;
+			let accumulatedResponse = "";
+
+			try {
+				const response = await fetch(OLLAMA_API_GENERATE_URL, { // Use the renamed constant
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						model: OLLAMA_MODEL, // Use the dynamically set model
+						prompt: userInput,
+						stream: true, // Enable streaming
+					}),
+				});
+
+				if (!response.ok) {
+					const errorBody = await response.text();
+					throw new Error(`API error: ${response.status} ${response.statusText}. Details: ${errorBody}`);
+				}
+
+				// Create the bot message element once
+				botMessageElement = document.createElement('div');
+				botMessageElement.classList.add('message', 'bot-message');
+				chatContainer.insertBefore(botMessageElement, typingIndicator);
+
+				const reader = response.body.getReader();
+				const decoder = new TextDecoder();
+
+				while (true) {
+					const { value, done } = await reader.read();
+					if (done) break;
+					
+					const chunk = decoder.decode(value, { stream: true });
+					// Ollama streams JSON objects separated by newlines
+					const jsonResponses = chunk.split('\n').filter(line => line.trim() !== '');
+
+					for (const jsonResponse of jsonResponses) {
+						try {
+							const parsed = JSON.parse(jsonResponse);
+							if (parsed.response) {
+								accumulatedResponse += parsed.response;
+								botMessageElement.textContent = accumulatedResponse; // Update content
+								scrollToBottom();
+							}
+							if (parsed.error) {
+								throw new Error(`Ollama error: ${parsed.error}`);
+							}
+							if (parsed.done && parsed.status === 'success') {
+								// Stream finished successfully for this request
+							}
+						} catch (e) {
+							console.warn('Error parsing JSON chunk:', e, jsonResponse);
+							// Potentially display a partial error or ignore if minor
+						}
+					}
+				}
+			} catch (error) {
+				console.error('Error sending message or processing stream:', error);
+				if (botMessageElement && !accumulatedResponse) {
+					// If bot message element was created but no response came, remove it or set error
+					botMessageElement.remove(); // Or update its content/style for error
+				}
+				addMessageToUI(`Error: ${error.message}`, 'error-message');
+			} finally {
+				typingIndicator.style.display = 'none';
+				scrollToBottom();
+			}
+		});
+
+		function addMessageToUI(text, className) {
+			const messageElement = document.createElement('div');
+			messageElement.classList.add('message', className);
+			messageElement.textContent = text;
+			// Insert the new message before the typing indicator
+			chatContainer.insertBefore(messageElement, typingIndicator);
+			scrollToBottom();
+		}
+
+		function scrollToBottom() {
+			chatContainer.scrollTop = chatContainer.scrollHeight;
+		}
+
+		// Optional: Add a welcome message or initial state
+		// addMessageToUI("Hello! How can I help you today?", "bot-message");
+
+	</script>
+</body>
+</html>
